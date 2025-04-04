@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/cms_service.dart';
 import '../models/page_model.dart';
+import '../models/text_model.dart';
 import '../widgets/dynamic_button.dart';
+import '../widgets/dynamic_input.dart';
+import '../widgets/dynamic_text.dart'; // Importez le widget DynamicText
 
 class LoginPage extends StatefulWidget {
   @override
@@ -24,89 +27,83 @@ class _LoginPageState extends State<LoginPage> {
       body: FutureBuilder<PageModel>(
         future: _futurePage,
         builder: (context, snapshot) {
-          // Afficher un indicateur de chargement pendant l'attente des données
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // Si une erreur se produit ou aucune donnée n'est trouvée
           if (snapshot.hasError || !snapshot.hasData) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 50, color: Colors.red),
-                  const SizedBox(height: 20),
-                  Text(
-                    "Erreur: ${snapshot.error ?? 'Données non disponibles'}",
-                    textAlign: TextAlign.center,
-                  ),
-                  ElevatedButton(
-                    onPressed: () => setState(() {
-                      _futurePage = _cmsService.fetchPage("welcome");
-                    }),
-                    child: const Text("Réessayer"),
-                  ),
-                ],
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _futurePage = _cmsService.fetchPage("login");
+                  });
+                },
+                child: const Text("Réessayer"),
               ),
             );
           }
 
           final page = snapshot.data!;
 
-          return Stack(
-            children: [
-              // Image de fond avec fallback
-              if (page.backgroundImageUrl.isNotEmpty)
-                Image.network(
-                  page.backgroundImageUrl,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                  errorBuilder: (_, __, ___) => Container(color: Colors.grey[200]),
-                )
-              else
-                Container(color: Colors.grey[200]),
-
-              // Contenu principal de la page
-              Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Affichage du contenu de la page
-                      if (page.content.isNotEmpty)
-                        Text(
-                          page.content,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                blurRadius: 10,
-                                color: Colors.black,
-                                offset: Offset(2, 2),
-                              ),
-                            ],
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-
-                      const SizedBox(height: 30),
-
-                      // Affichage dynamique des boutons
-                      ...page.buttons.map((btn) {
+          return Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              color: Color(int.parse(page.backgroundColor.replaceFirst('#', '0xff'))),
+              image: page.backgroundImageUrl.isNotEmpty
+                  ? DecorationImage(
+                image: NetworkImage(page.backgroundImageUrl),
+                fit: BoxFit.cover,
+                onError: (_, __) => const SizedBox(),
+              )
+                  : null,
+            ),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Affichage des textes dynamiques
+                    ...page.texts.map((textModel) {
+                      if (textModel.position == "above") {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: DynamicButton(button: btn),
+                          child: DynamicTextWidget(textModel: textModel), // Affichage du texte au-dessus
                         );
-                      }).toList(),
-                    ],
-                  ),
+                      }
+                      return SizedBox(); // Si "below", on ne l'affiche pas encore
+                    }),
+
+                    // Affichage des inputs dynamiques
+                    ...page.inputs.map((input) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: DynamicInput(input: input),
+                    )),
+
+                    // Affichage des textes dynamiques qui viennent après les inputs
+                    ...page.texts.map((textModel) {
+                      if (textModel.position == "below") {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: DynamicTextWidget(textModel: textModel), // Affichage du texte en dessous
+                        );
+                      }
+                      return SizedBox(); // Si "above", on ne l'affiche pas ici
+                    }),
+
+                    const SizedBox(height: 16),
+
+                    // Affichage des boutons dynamiques
+                    ...page.buttons.map((btn) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: DynamicButton(button: btn),
+                    )),
+                  ],
                 ),
               ),
-            ],
+            ),
           );
         },
       ),

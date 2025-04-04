@@ -1,4 +1,4 @@
-import 'design_model.dart';
+import 'design_button_model.dart';
 
 class ButtonModel {
   final String label;
