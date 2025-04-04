@@ -1,42 +1,49 @@
 import 'package:flutter/material.dart';
 import '../models/text_model.dart';
+import '../models/image_model.dart';
 
 class DynamicTextWidget extends StatelessWidget {
   final TextModel textModel;
 
   const DynamicTextWidget({Key? key, required this.textModel}) : super(key: key);
 
+  Color _parseColor(String? hexColor) {
+    if (hexColor == null || hexColor.isEmpty) return Colors.black;
+    try {
+      return Color(int.parse(hexColor.replaceFirst('#', '0xFF')));
+    } catch (e) {
+      return Colors.black;
+    }
+  }
+
+  List<Widget> _buildImages(List<ImageModel> images) {
+    return images.map((img) {
+      return Image.network(
+        img.imageUrl,
+        width: img.width,
+        height: img.height,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(Icons.broken_image, size: 50, color: Colors.red);
+        },
+      );
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Déboguer la couleur pour voir ce que nous avons
-    print('textColor: ${textModel.textColor}');  // Afficher la couleur reçue
-
-    String? colorString = textModel.textColor;
-
-    // Si la couleur est nulle ou vide, utiliser une couleur par défaut (ici, noir)
-    if (colorString == null || colorString.isEmpty) {
-      colorString = '#000000';  // Couleur noire par défaut
-    }
-
-    // Vérification si la chaîne commence par "#" et a une longueur de 7 (format hexadécimal)
-    if (colorString.startsWith('#') && colorString.length == 7) {
-      // Ajouter '0xFF' devant la couleur (en supposant qu'il s'agit d'une couleur hexadécimale RGB)
-      colorString = '0xFF${colorString.substring(1)}';
-    } else {
-      // Si la chaîne n'est pas valide, attribuer une couleur par défaut et afficher un avertissement
-      print('Erreur de format de couleur: $colorString');
-      colorString = '0xFF000000';  // Utilisation d'une couleur noire par défaut
-    }
-
-    // Essayer de convertir la couleur en un entier. Si la conversion échoue, utiliser la couleur noire.
-    Color color;
-    try {
-      color = Color(int.parse(colorString));
-    } catch (e) {
-      // Gestion d'une éventuelle erreur de parsing
-      print('Erreur lors de la conversion de la couleur: $e');
-      color = Colors.black;  // Couleur noire par défaut en cas d'erreur
-    }
+    final leftImages = textModel.images.where((img) => img.alignment == 'left').toList();
+    final rightImages = textModel.images.where((img) => img.alignment == 'right').toList();
+    final aboveImages = textModel.images.where((img) => img.alignment == 'above').toList();
+    final belowImages = textModel.images.where((img) => img.alignment == 'below').toList();
 
     return Container(
       margin: EdgeInsets.only(
@@ -51,13 +58,34 @@ class DynamicTextWidget extends StatelessWidget {
         bottom: textModel.paddingBottom,
         left: textModel.paddingLeft,
       ),
-      child: Text(
-        textModel.text,
-        style: TextStyle(
-          color: color,
-          fontSize: textModel.fontSize,
-          fontWeight: textModel.fontWeight,
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ..._buildImages(aboveImages),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ..._buildImages(leftImages),
+              SizedBox(width: 4), // Ajoute un petit espace entre l'image et le texte
+              Flexible(
+                child: Text(
+                  textModel.text,
+                  style: TextStyle(
+                    color: _parseColor(textModel.textColor),
+                    fontSize: textModel.fontSize,
+                    fontWeight: textModel.fontWeight,
+                  ),
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
+                ),
+              ),
+              SizedBox(width: 6), // Ajoute un petit espace entre le texte et l'image à droite
+              ..._buildImages(rightImages),
+            ],
+          ),
+          ..._buildImages(belowImages),
+        ],
       ),
     );
   }

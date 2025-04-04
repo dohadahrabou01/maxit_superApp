@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'image_model.dart';
+
 class TextModel {
   final String text;
   final double marginTop;
@@ -14,6 +16,8 @@ class TextModel {
   final double fontSize;
   final FontWeight fontWeight;
   final String position; // "above" ou "below"
+  final List<ImageModel> images; // 🔥 Liste d’images associées
+
   TextModel({
     required this.text,
     this.marginTop = 0.0,
@@ -24,22 +28,34 @@ class TextModel {
     this.paddingRight = 0.0,
     this.paddingBottom = 0.0,
     this.paddingLeft = 0.0,
-    this.textColor = "#000000", // Couleur par défaut
+    this.textColor = "#000000",
     this.fontSize = 14.0,
     this.fontWeight = FontWeight.normal,
-    this.position = "below", // Par défaut, le texte est en dessous
+    this.position = "below",
+    this.images = const [], // Par défaut vide
   });
 
   factory TextModel.fromJson(Map<String, dynamic> json) {
-    // Gestion du fontWeight avec une vérification plus robuste
     String fontWeightString = json['font_weight'] ?? 'normal';
     FontWeight fontWeight = _getFontWeight(fontWeightString);
 
-    // Gestion de textColor
     String textColor = json['text_color'] ?? '#000000';
-    // Vérification du format hexadécimal de la couleur
     if (!RegExp(r'^#[0-9A-Fa-f]{6}$').hasMatch(textColor)) {
-      textColor = '#000000'; // Valeur par défaut si la couleur est invalide
+      textColor = '#000000';
+    }
+
+    // 🔄 Conversion des images JSON en ImageModel
+    List<ImageModel> images = [];
+
+    if (json['image'] != null) {
+      final imageData = json['image'];
+      images.add(ImageModel(
+        imageUrl: imageData['Image_Url'] ?? '',
+        description: '',
+        alignment: imageData['alignment'] ?? 'left',
+        width: (imageData['width'] ?? 50).toDouble(),
+        height: (imageData['height'] ?? 50).toDouble(),
+      ));
     }
 
     return TextModel(
@@ -56,6 +72,7 @@ class TextModel {
       fontSize: json['font_size']?.toDouble() ?? 14.0,
       fontWeight: fontWeight,
       position: json['position'] ?? "below",
+      images: images, // ✅ assignation des images
     );
   }
 
@@ -71,19 +88,12 @@ class TextModel {
 
   static TextModel defaultValue() {
     return TextModel(
-      text: '', // Texte par défaut vide
-      marginTop: 0.0,
-      marginRight: 0.0,
-      marginBottom: 0.0,
-      marginLeft: 0.0,
-      paddingTop: 0.0,
-      paddingRight: 0.0,
-      paddingBottom: 0.0,
-      paddingLeft: 0.0,
-      textColor: '#000000', // Couleur du texte par défaut
-      fontSize: 14.0, // Taille de police par défaut
+      text: '',
+      textColor: '#000000',
+      fontSize: 14.0,
       fontWeight: FontWeight.normal,
-      position: "above",// Poids de police par défaut
+      position: "above",
+      images: [],
     );
   }
 }

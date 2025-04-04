@@ -9,7 +9,7 @@ class CmsService {
     try {
 
       final response = await http.get(
-          Uri.parse("$baseUrl/pages?filters[nom][\$eq]=$pageName&populate=inputs&populate=texts&populate=bouttons.design")
+          Uri.parse("$baseUrl/pages?filters[nom][\$eq]=$pageName&populate=inputs&populate=texts.image&populate=bouttons.design")
       );
 
       print("Response status: ${response.statusCode}");
