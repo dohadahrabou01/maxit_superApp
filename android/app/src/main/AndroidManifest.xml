@@ -39,6 +39,8 @@
     <meta-data
         android:name="io.flutter.embedding.android.EnableImpeller"
         android:value="false" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>

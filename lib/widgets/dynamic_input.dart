@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import '../models/input_model.dart';
 
-class DynamicInput extends StatelessWidget {
+class DynamicInput extends StatefulWidget {
   final InputModel input;
 
   const DynamicInput({Key? key, required this.input}) : super(key: key);
 
   @override
+  _DynamicInputState createState() => _DynamicInputState();
+}
+
+class _DynamicInputState extends State<DynamicInput> {
+  bool _obscureText = true;
+
+  @override
   Widget build(BuildContext context) {
+    final input = widget.input;
+
     return Container(
       margin: EdgeInsets.only(
         top: input.marginTop,
@@ -18,7 +27,6 @@ class DynamicInput extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Label au-dessus du champ, facultatif
           if (input.label.isNotEmpty)
             Padding(
               padding: EdgeInsets.only(
@@ -52,6 +60,7 @@ class DynamicInput extends StatelessWidget {
               borderRadius: BorderRadius.circular(input.borderRadius),
             ),
             child: TextField(
+              obscureText: input.type == 'password' ? _obscureText : false,
               decoration: InputDecoration(
                 hintText: input.placeholder,
                 hintStyle: TextStyle(
@@ -74,6 +83,19 @@ class DynamicInput extends StatelessWidget {
                   ),
                 )
                     : InputBorder.none,
+                suffixIcon: input.type == 'password'
+                    ? IconButton(
+                  icon: Icon(
+                    _obscureText ? Icons.visibility_off : Icons.visibility,
+                    color: Color(int.parse(input.textColor.replaceFirst('#', '0xFF'))),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                )
+                    : null,
               ),
               style: TextStyle(
                 color: Color(int.parse(input.textColor.replaceFirst('#', '0xFF'))),

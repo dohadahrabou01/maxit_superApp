@@ -1,8 +1,7 @@
-// input_model.dart
-
 class InputModel {
   final String label;
   final String placeholder;
+  final String type; // ✅ Nouveau champ ici
   final String backgroundColor;
   final String textColor;
   final String borderColor;
@@ -22,6 +21,7 @@ class InputModel {
   InputModel({
     required this.label,
     required this.placeholder,
+    required this.type, // ✅ Ajouté ici
     required this.backgroundColor,
     required this.textColor,
     required this.borderColor,
@@ -43,6 +43,7 @@ class InputModel {
     return InputModel(
       label: json['label'] ?? '',
       placeholder: json['placeholder'] ?? '',
+      type: json['type'] ?? 'text', // ✅ Lecture depuis le JSON avec une valeur par défaut
       backgroundColor: json['background_color'] ?? '#FFFFFF',
       textColor: json['text_color'] ?? '#000000',
       borderColor: json['border_color'] ?? '#000000',
@@ -56,8 +57,8 @@ class InputModel {
       paddingRight: json['padding_right']?.toDouble() ?? 8.0,
       paddingBottom: json['padding_bottom']?.toDouble() ?? 8.0,
       paddingLeft: json['padding_left']?.toDouble() ?? 8.0,
-      underline: json['underline'] ?? false,  // Assurer que "underline" est bien récupéré
-      underlineColor: json['underline_color'] ?? '#000000',  // Assurer que "underline_color" est bien récupéré
+      underline: json['underline'] ?? false,
+      underlineColor: json['underline_color'] ?? '#000000',
     );
   }
 
@@ -65,6 +66,7 @@ class InputModel {
     return InputModel(
       label: 'Label par défaut',
       placeholder: 'Placeholder par défaut',
+      type: 'text', // ✅ Valeur par défaut ici
       backgroundColor: '#FFFFFF',
       textColor: '#000000',
       borderColor: '#000000',
