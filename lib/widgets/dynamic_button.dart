@@ -4,8 +4,8 @@ import '../models/button_model.dart';
 class DynamicButton extends StatelessWidget {
   final ButtonModel button;
   final double defaultSpacing = 12.0;
-
-  const DynamicButton({required this.button, Key? key}) : super(key: key);
+  final VoidCallback? onPressed;
+  const DynamicButton({required this.button,this.onPressed ,Key? key}) : super(key: key);
 
   Color _parseColor(String hexColor) {
     try {
@@ -65,11 +65,11 @@ class DynamicButton extends StatelessWidget {
           elevation: 4,
           shadowColor: Colors.black26,
         ),
-        onPressed: () {
-          // TODO: Implémenter la navigation selon button.action
+        onPressed: onPressed ?? () {
           print("Action: ${button.action}");
           Navigator.pushNamed(context, button.action);
         },
+
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Text(

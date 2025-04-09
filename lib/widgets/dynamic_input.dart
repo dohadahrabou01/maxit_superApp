@@ -3,8 +3,8 @@ import '../models/input_model.dart';
 
 class DynamicInput extends StatefulWidget {
   final InputModel input;
-
-  const DynamicInput({Key? key, required this.input}) : super(key: key);
+  final TextEditingController? controller;
+  const DynamicInput({Key? key,this.controller, required this.input}) : super(key: key);
 
   @override
   _DynamicInputState createState() => _DynamicInputState();
@@ -60,6 +60,7 @@ class _DynamicInputState extends State<DynamicInput> {
               borderRadius: BorderRadius.circular(input.borderRadius),
             ),
             child: TextField(
+              controller: widget.controller,
               obscureText: input.type == 'password' ? _obscureText : false,
               decoration: InputDecoration(
                 hintText: input.placeholder,

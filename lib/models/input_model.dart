@@ -17,6 +17,7 @@ class InputModel {
   final double paddingLeft;
   final bool underline;
   final String underlineColor;
+  final String identifiant;
 
   InputModel({
     required this.label,
@@ -37,6 +38,7 @@ class InputModel {
     required this.paddingLeft,
     required this.underline,
     required this.underlineColor,
+    required this.identifiant,
   });
 
   factory InputModel.fromJson(Map<String, dynamic> json) {
@@ -59,6 +61,7 @@ class InputModel {
       paddingLeft: json['padding_left']?.toDouble() ?? 8.0,
       underline: json['underline'] ?? false,
       underlineColor: json['underline_color'] ?? '#000000',
+        identifiant:json['identifiant']??'rien',
     );
   }
 
@@ -82,6 +85,7 @@ class InputModel {
       paddingLeft: 8.0,
       underline: false,
       underlineColor: '#000000',
+        identifiant:'rien',
     );
   }
 }
