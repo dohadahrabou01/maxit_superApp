@@ -1,27 +1,32 @@
 import 'package:flutter/material.dart';
-import '../services/cms_service.dart';
-import '../models/page_model.dart';
-import '../models/text_model.dart';
-import '../services/register_service.dart';
-import '../widgets/dynamic_button.dart';
-import '../widgets/dynamic_input.dart';
-import '../widgets/dynamic_text.dart'; // Importez le widget DynamicText
+import '../../services/cms_service/cms_service.dart';
+import '../../services/auth_service/complete_service.dart';
+import '../../models/page_model.dart';
+import '../../models/text_model.dart';
+import '../../widgets/dynamic_button.dart';
+import '../../widgets/dynamic_input.dart';
+import '../../widgets/dynamic_text.dart';
 
-class RegisterPage extends StatefulWidget {
+class CompletePage extends StatefulWidget {
+  final String numero;
+
+  const CompletePage({required this.numero, Key? key}) : super(key: key);
+
   @override
-  _RegisterPageState createState() => _RegisterPageState();
+  _CompletePageState createState() => _CompletePageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _CompletePageState extends State<CompletePage> {
   final CmsService _cmsService = CmsService();
-  final RegisterService _registerService = RegisterService();
+  final CompleteService _completeService = CompleteService();
 
   late Future<PageModel> _futurePage;
-  TextEditingController _phoneController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
-    _futurePage = _cmsService.fetchPage("register");
+    _futurePage = _cmsService.fetchPage("complete");
   }
 
   @override
@@ -39,7 +44,7 @@ class _RegisterPageState extends State<RegisterPage> {
               child: ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    _futurePage = _cmsService.fetchPage("register");
+                    _futurePage = _cmsService.fetchPage("complete");
                   });
                 },
                 child: const Text("Réessayer"),
@@ -68,27 +73,25 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Affichage des textes dynamiques
+                    // Textes au-dessus
                     ...page.texts.map((textModel) {
                       if (textModel.position == "above") {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: DynamicTextWidget(textModel: textModel), // Affichage du texte au-dessus
+                          child: DynamicTextWidget(textModel: textModel),
                         );
                       }
-                      return SizedBox(); // Si "below", on ne l'affiche pas encore
+                      return const SizedBox();
                     }),
 
-
-
-
+                    // Inputs
                     ...page.inputs.map((input) {
-                      if (input.identifiant == "numero") {
+                      if (input.identifiant == "password") {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: DynamicInput(
                             input: input,
-                            controller: _phoneController, // Liaison ici
+                            controller: _passwordController, // Liaison au contrôleur
                           ),
                         );
                       } else {
@@ -99,63 +102,50 @@ class _RegisterPageState extends State<RegisterPage> {
                       }
                     }),
 
-
-                    // Affichage des textes dynamiques qui viennent après les inputs
+                    // Textes en dessous
                     ...page.texts.map((textModel) {
                       if (textModel.position == "below") {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: DynamicTextWidget(textModel: textModel), // Affichage du texte en dessous
+                          child: DynamicTextWidget(textModel: textModel),
                         );
                       }
-                      return SizedBox(); // Si "above", on ne l'affiche pas ici
+                      return const SizedBox();
                     }),
 
                     const SizedBox(height: 16),
 
-                    // Affichage des boutons dynamiques
+                    // Boutons
                     ...page.buttons.map((btn) => Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: DynamicButton(
                         button: btn,
                         onPressed: () async {
-                          if (btn.identifiant == "sendOtp") {
-                            String numero = _phoneController.text.trim();
+                          if (btn.identifiant == "inscription") {
+                            String password = _passwordController.text.trim();
 
-                            print("Numéro entré: $numero");  // Vérification du numéro
-
-                            if (numero.isEmpty) {
+                            if (password.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text("Veuillez entrer votre numéro de téléphone")),
+                                SnackBar(content: Text("Veuillez entrer un mot de passe")),
                               );
                               return;
                             }
 
-                            // Envoi de la requête
-                            final response = await _registerService.sendOtp(numero);
-                            print("Réponse du service: $response");  // Vérification de la réponse
+                            final response = await _completeService.verifyOtp(widget.numero, password);
 
                             if (response.startsWith("❌")) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text(response)),
                               );
                             } else {
-                              print("Réponse réussie, navigation vers la page OTP");
-                              Navigator.pushNamed(
-                                context,
-                                btn.action,  // Utilisez l'action du bouton
-                                arguments: numero,  // Passer le numéro comme argument
-                              );// Navigue vers OTP
+                              Navigator.pushNamed(context, btn.action); // Navigation dynamique
                             }
                           } else {
-                            print("Réponse  non réussie");
-                            Navigator.pushNamed(context, "/welcome");
+                            Navigator.pushNamed(context, btn.action);
                           }
                         },
-
                       ),
                     )),
-
                   ],
                 ),
               ),

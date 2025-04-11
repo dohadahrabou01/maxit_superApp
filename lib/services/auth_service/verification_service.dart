@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class VerificationService {
   Future<String> verifyOtp(String numero, String otp) async {
-    final url = Uri.parse('http://10.0.2.2:9009/auth/register/verify'); // Remplacez par l'URL de votre API
+    final url = Uri.parse('http://10.0.2.2:8888/AUTH-SERVICE/auth/register/verify'); // Remplacez par l'URL de votre API
 
     final response = await http.post(
       url,

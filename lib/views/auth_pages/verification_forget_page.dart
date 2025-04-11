@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import '../services/cms_service.dart';
-import '../models/page_model.dart';
-import '../models/text_model.dart';
-import '../services/verification_service.dart';  // Import du service de vérification
-import '../widgets/dynamic_button.dart';
-import '../widgets/dynamic_text.dart';
+import '../../services/cms_service/cms_service.dart';
+import '../../models/page_model.dart';
+import '../../models/text_model.dart';
+import '../../services/auth_service/verification_service.dart';  // Import du service de vérification
+import '../../widgets/dynamic_button.dart';
+import '../../widgets/dynamic_text.dart';
 import 'dart:async'; // Importer la bibliothèque pour le Timer
 
-class PinVerificationPage extends StatefulWidget {
+class PinVerificationForgetPage extends StatefulWidget {
   final String numero;  // Assurez-vous de transmettre le numéro de téléphone
 
-  PinVerificationPage({required this.numero}); // Le numéro est passé via le constructeur
+  PinVerificationForgetPage({required this.numero}); // Le numéro est passé via le constructeur
 
   @override
-  _PinVerificationPageState createState() => _PinVerificationPageState();
+  _PinVerificationForgetPageState createState() => _PinVerificationForgetPageState();
 }
 
-class _PinVerificationPageState extends State<PinVerificationPage> {
+class _PinVerificationForgetPageState extends State<PinVerificationForgetPage> {
   final CmsService _cmsService = CmsService();
   final VerificationService _verificationService = VerificationService(); // Service de vérification
   late Timer _timer;  // Déclaration du Timer
@@ -30,7 +30,7 @@ class _PinVerificationPageState extends State<PinVerificationPage> {
   @override
   void initState() {
     super.initState();
-    _futurePage = _cmsService.fetchPage("verification");
+    _futurePage = _cmsService.fetchPage("verification-forget");
     _startTimer();
   }
 
@@ -126,7 +126,12 @@ class _PinVerificationPageState extends State<PinVerificationPage> {
     if (response.contains("✅")) {
       // Si la vérification est réussie, vous pouvez naviguer vers la page de saisie du mot de passe
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("OTP validé, veuillez entrer votre mot de passe")));
-      Navigator.pushNamed(context, "/complete");  // Par exemple, rediriger vers la page de mot de passe
+      Navigator.pushNamed(
+        context,
+        "/reset-password",
+        arguments: widget.numero,
+      );
+      // Par exemple, rediriger vers la page de mot de passe
     } else {
       // Si l'OTP est invalide, afficher un message d'erreur
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response)));
@@ -148,7 +153,7 @@ class _PinVerificationPageState extends State<PinVerificationPage> {
               child: ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    _futurePage = _cmsService.fetchPage("verification");
+                    _futurePage = _cmsService.fetchPage("verification-forget");
                   });
                 },
                 child: const Text("Réessayer"),
@@ -187,7 +192,7 @@ class _PinVerificationPageState extends State<PinVerificationPage> {
 
                     // Cases PIN
                     _buildPinInput(),
-                 // Affichage du texte "Envoyé à $numero" en gris sous les cases PIN
+                    // Affichage du texte "Envoyé à $numero" en gris sous les cases PIN
                     Text(
                       "Envoyé à ${widget.numero}",
                       style: TextStyle(
@@ -227,14 +232,14 @@ class _PinVerificationPageState extends State<PinVerificationPage> {
                     ...page.buttons.map((btn) {
                       if (btn.identifiant == "verify") { // Vérifie si l'identifiant du bouton est "verify"
                         return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: DynamicButton(
-                            button: btn,
-                            onPressed: () async {
-                              // Appel de la fonction _verifyPin lorsque le bouton est cliqué
-                              _verifyPin();
-                            },
-                          )
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: DynamicButton(
+                              button: btn,
+                              onPressed: () async {
+                                // Appel de la fonction _verifyPin lorsque le bouton est cliqué
+                                _verifyPin();
+                              },
+                            )
                         );
                       } else {
                         return Padding(

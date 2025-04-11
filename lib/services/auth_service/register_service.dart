@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 class RegisterService {
   final String baseUrl;
 
-  RegisterService({this.baseUrl = "http://10.0.2.2:9009"}); // Remplace localhost par l'IP de ton backend si nécessaire
+  RegisterService({this.baseUrl = "http://10.0.2.2:8888/AUTH-SERVICE/"}); // Remplace localhost par l'IP de ton backend si nécessaire
 
   Future<String> sendOtp(String phoneNumber) async {
     final uri = Uri.parse("$baseUrl/auth/register/send");

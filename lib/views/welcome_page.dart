@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/cms_service.dart';
+import '../services/cms_service/cms_service.dart';
 import '../models/page_model.dart';
 import '../widgets/dynamic_button.dart';
 
